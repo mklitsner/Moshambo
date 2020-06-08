@@ -2,8 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum PlayerState
+{
+	InPlay, Win, Lose, Tie, ResetRound, Ready
+}
+
 public class Player_Reciever : MonoBehaviour {
 	public GameObject player_1;
+	[SerializeField] Player_Script P1, P2;
 	public GameObject player_2;
 	// Use this for initialization
 	public int p1Score;
@@ -21,6 +27,8 @@ public class Player_Reciever : MonoBehaviour {
 	AudioSource source;
 
 
+ 
+
 
 	void Start () {
 		menu = true;
@@ -31,60 +39,76 @@ public class Player_Reciever : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		string player1State = player_1.transform.GetComponent<Player_Script> ().State;
-		string player2State = player_2.transform.GetComponent<Player_Script> ().State;
+		PlayerState player1State = P1.pState;
+		PlayerState player2State = P2.pState;
 
-	if (player1State == "InPlay") {
-	
-			ScoreMarked = false;
-			playersReady = false;
-
-		}
-			
-			if (player1State == "Win") {
-				print ("Win:Lose");
+        //bad code where I judge the winner based on the state of player 1
+        //instead of just computing everything in this script
+        //TODO mirgrate colision detection to this, which is effectivily the 'game manager' script
+        switch (player1State)
+        {
+            case PlayerState.InPlay:
+				ScoreMarked = false;
+				playersReady = false;
+				break;
+            case PlayerState.Win:
+				print("Win:Lose");
 				//display win/lose
 				//add one score to player 1
-			if (ScoreMarked == false) {
-				source.PlayOneShot (win);
-				p1Score = p1Score + 1;
-				ScoreMarked = true;
-			}
-			timer= timer-Time.deltaTime;
-			if (timer <= 0 && p1Score<5) {
-				ScoreShown = true;
-				timer = 2;
-			}else if(timer < -2 && p1Score>=5){
-				menu = true;
-				source.PlayOneShot (final);
-			}
-			} else if (player1State == "Lose") {
-				print ("Lose:Win");
+				if (ScoreMarked == false)
+				{
+					source.PlayOneShot(win);
+					p1Score = p1Score + 1;
+					ScoreMarked = true;
+				}
+				timer = timer - Time.deltaTime;
+				if (timer <= 0 && p1Score < 5)
+				{
+					ScoreShown = true;
+					timer = 2;
+				}
+				else if (timer < -2 && p1Score >= 5)
+				{
+					menu = true;
+					source.PlayOneShot(final);
+				}
+				break;
+            case PlayerState.Lose:
+				print("Lose:Win");
 				//display lose/win
 				//add one score to player 2
-			if (ScoreMarked == false) {
-				source.PlayOneShot (win);
-				p2score = p2score + 1;
-				ScoreMarked = true;
-			}else if(timer < -2 && p2score>=5){
-				menu = true;
-				source.PlayOneShot (final);
-			}
-			timer= timer-Time.deltaTime;
-			if (timer <= 0 && p2score<5) {
-				ScoreShown = true;
-				timer = 2;
-			}
+				if (ScoreMarked == false)
+				{
+					source.PlayOneShot(win);
+					p2score = p2score + 1;
+					ScoreMarked = true;
+				}
+				else if (timer < -2 && p2score >= 5)
+				{
+					menu = true;
+					source.PlayOneShot(final);
+				}
+				timer = timer - Time.deltaTime;
+				if (timer <= 0 && p2score < 5)
+				{
+					ScoreShown = true;
+					timer = 2;
+				}
+				break;
+            case PlayerState.Tie:
+				print("Tie");
+				break;
+            case PlayerState.ResetRound:
+                break;
+            case PlayerState.Ready:
+                break;
+            default:
+                break;
+        }
 
 
-			} else if (player1State == "Tie") {
-				print ("Tie");
-				//clank sound
-			}
 
-
-
-		if (player1State == "Ready" && player2State == "Ready"&& menu==false) {
+		if (player1State == PlayerState.Ready && player2State == PlayerState.Ready && menu ==false) {
 			playersReady = true;
 			//display "go"
 			ScoreShown = false;
@@ -95,9 +119,9 @@ public class Player_Reciever : MonoBehaviour {
 
 		}
 
-	}
+    }
 
-	void NewGame(){
+    void NewGame(){
 
 		p1Score = 0;
 		p2score = 0;

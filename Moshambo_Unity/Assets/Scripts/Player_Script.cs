@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Player_Script : MonoBehaviour {
-
-	Title_Screen GetTitle_Screen;
+    private const string Rock_Pressed = "Rock_Pressed";
+    private const string Paper_Pressed = "Paper_Pressed";
+    private const string Scissors_Pressed = "Scissors_Pressed";
+    private const string Won = "Won";
+    private const string Lost = "Lost";
+    private Player_Reciever player_Reciever;
+    Title_Screen GetTitle_Screen;
     private bool arcadeMode;
     public AudioClip dud;
 
@@ -17,7 +22,7 @@ public class Player_Script : MonoBehaviour {
 
 	public string[] Buttons;
 
-
+	public PlayerState pState;
 
 	Animator anim;
 
@@ -33,6 +38,9 @@ public class Player_Script : MonoBehaviour {
 
     void Start()
     {
+
+		player_Reciever =
+		transform.parent.parent.GetComponent<Player_Reciever>();
 
 		GetTitle_Screen = FindObjectOfType<Title_Screen>().GetComponent<Title_Screen>();
 
@@ -66,51 +74,64 @@ public class Player_Script : MonoBehaviour {
 		ButtonsPressed ();
 		SetAnimations ();
 
-		if (State == "InPlay") {
-			anim.SetBool ("reset_round", false);
-		
-			Move ();
-		} else if (State == "Win") {
-			//play win anim
-			anim.SetBool ("Won", true);
-			if (transform.parent.parent.GetComponent<Player_Reciever> ().ScoreShown) {
-				State = "ResetRound";
-			}
-		} else if (State == "Lose") {
-			//play lose anim
-			anim.SetBool ("Lost", true);
-			if (transform.parent.parent.GetComponent<Player_Reciever> ().ScoreShown) {
-				State = "ResetRound";
-			}
-		} else if (State == "Tie") {
-			BounceBack ();
-			source.PlayOneShot (dud);
-			State = "InPlay";
-		}else if(State== "ResetRound"){
-			//go back to starting position
-			//currentType= Random.Range(1,4);
-			anim.SetInteger("Start_State",currentType);
 
-			Retreat (20);
-			if (transform.position.x*direction >= retreat_limit*direction) {
-				State = "Ready";
-			}
-		}else if(State== "Ready"){
-			anim.SetBool("reset_round",true);
-			//state once at starting position. once both are at starting position, go to inplay
-			if (transform.parent.parent.GetComponent<Player_Reciever> ().playersReady) {
-				anim.SetBool("Won",false);
-				anim.SetBool ("Lost",false);
+		switch (pState)
+		{
+			case PlayerState.InPlay:
+				anim.SetBool("reset_round", false);
 
-				State = "InPlay";
+				Move();
+				break;
+			case PlayerState.Win:
+				//play win anim
+				anim.SetBool(Won, true);
+				if (player_Reciever.ScoreShown)
+				{
+					pState = PlayerState.ResetRound;
+				}
+				break;
+			case PlayerState.Lose:
+				//play lose anim
+				anim.SetBool(Lost, true);
+				if (player_Reciever.ScoreShown)
+				{
+					pState = PlayerState.ResetRound;
+				}
+				break;
+			case PlayerState.Tie:
+				BounceBack();
+				source.PlayOneShot(dud);
+				pState = PlayerState.InPlay;
+				break;
+			case PlayerState.ResetRound:
+				//go back to starting position
+				//currentType= Random.Range(1,4);
+				anim.SetInteger("Start_State", currentType);
 
-			};
+				Retreat(20);
+				if (transform.position.x * direction >= retreat_limit * direction)
+				{
+					pState = PlayerState.Ready;
+				}
+				break;
+			case PlayerState.Ready:
+				anim.SetBool("reset_round", true);
+				//state once at starting position. once both are at starting position, go to inplay
+				if (player_Reciever.playersReady)
+				{
+					anim.SetBool(Won, false);
+					anim.SetBool(Lost, false);
+
+					pState = PlayerState.InPlay;
+				}
+				break;
+			default:
+				break;
 		}
 
 
-	
-		
-	}
+
+    }
 
 
     public enum ButtonPressed
@@ -122,9 +143,9 @@ public class Player_Script : MonoBehaviour {
 
 
 	void SetAnimations(){
-		anim.SetBool ("Rock_Pressed", IsRockPressed());
-		anim.SetBool ("Paper_Pressed", IsPaperPressed());
-		anim.SetBool ("Scissors_Pressed", IsScissorsPressed());
+		anim.SetBool (Rock_Pressed, IsRockPressed());
+		anim.SetBool (Paper_Pressed, IsPaperPressed());
+		anim.SetBool (Scissors_Pressed, IsScissorsPressed());
 	}
 		
 
@@ -288,12 +309,13 @@ public class Player_Script : MonoBehaviour {
 		//if opponent is rock(1)
 		if (opponentType == 1) {
 			if (currentType == 1) {
-				State="Tie";
-			}else if(currentType==3) {
-				State="Lose";
-				
+				pState = PlayerState.Tie;
+			}
+			else if(currentType==3) {
+				pState = PlayerState.Lose;
+
 			} else if(currentType==2) {
-				State="Win";
+				pState = PlayerState.Win;
 			}
 		}
 
@@ -301,11 +323,11 @@ public class Player_Script : MonoBehaviour {
 
 		if (opponentType == 2) {
 			if (currentType == 3) {
-				State="Win";
+				pState=PlayerState.Win;
 			} else if(currentType==2) {
-				State="Tie";
+				pState = PlayerState.Tie;
 			} else if(currentType==1) {
-				State="Lose";
+				pState = PlayerState.Lose;
 			}
 		}
 
@@ -313,11 +335,11 @@ public class Player_Script : MonoBehaviour {
 
 		if (opponentType == 3) {
 			if (currentType == 2) {
-				State="Lose";
+				pState = PlayerState.Lose;
 			} else if(currentType==1) {
-				State="Win";
+				pState = PlayerState.Win;
 			} else if(currentType==3) {
-				State="Tie";
+				pState = PlayerState.Tie;
 			}
 		}
 

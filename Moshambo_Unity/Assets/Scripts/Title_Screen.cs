@@ -80,7 +80,7 @@ public string[] Buttonsp2;
 			ChangeSize(false);
 
 			anim.SetBool("Open",false);
-			print ("close");
+//			print ("close");
 			if(transform.position.y<8){
 				transform.Translate (Vector3.up * 4*Time.deltaTime);
 			}else{
