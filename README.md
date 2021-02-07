@@ -4,3 +4,6 @@ A new take on the classic game of roshambo, Moshambo is a fast-paced dueler that
 
 
 UNITY_VERSION: 2017.4.40f1
+
+
+MOSHAMBO_Unity_2021 Version: 2019.4.17f
